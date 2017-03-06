@@ -7,7 +7,9 @@ feature engineering
 import cPickle
 import pandas as pd
 import numpy as np
+import gensim
 from fuzzywuzzy import fuzz
+from gensim import models
 from gensim.models import Word2Vec
 from nltk.corpus import stopwords
 from tqdm import tqdm
@@ -51,34 +53,34 @@ def sent2vec(s):
     return v / np.sqrt((v ** 2).sum())
 
 
-data = pd.read_csv('quora_duplicate_questions.tsv', sep='\t')
+data = pd.read_csv('data/quora_duplicate_questions.tsv', sep='\t')
 data = data.drop(['id', 'qid1', 'qid2'], axis=1)
 
 
-data['len_q1'] = data.question1.apply(lambda x: len(str(x)))
-data['len_q2'] = data.question2.apply(lambda x: len(str(x)))
-data['diff_len'] = data.len_q1 - data.len_q2
-data['len_char_q1'] = data.question1.apply(lambda x: len(''.join(set(str(x).replace(' ', '')))))
-data['len_char_q2'] = data.question2.apply(lambda x: len(''.join(set(str(x).replace(' ', '')))))
-data['len_word_q1'] = data.question1.apply(lambda x: len(str(x).split()))
-data['len_word_q2'] = data.question2.apply(lambda x: len(str(x).split()))
-data['common_words'] = data.apply(lambda x: len(set(str(x['question1']).lower().split()).intersection(set(str(x['question2']).lower().split()))), axis=1)
-data['fuzz_qratio'] = data.apply(lambda x: fuzz.QRatio(str(x['question1']), str(x['question2'])), axis=1)
-data['fuzz_WRatio'] = data.apply(lambda x: fuzz.WRatio(str(x['question1']), str(x['question2'])), axis=1)
-data['fuzz_partial_ratio'] = data.apply(lambda x: fuzz.partial_ratio(str(x['question1']), str(x['question2'])), axis=1)
-data['fuzz_partial_token_set_ratio'] = data.apply(lambda x: fuzz.partial_token_set_ratio(str(x['question1']), str(x['question2'])), axis=1)
-data['fuzz_partial_token_sort_ratio'] = data.apply(lambda x: fuzz.partial_token_sort_ratio(str(x['question1']), str(x['question2'])), axis=1)
-data['fuzz_token_set_ratio'] = data.apply(lambda x: fuzz.token_set_ratio(str(x['question1']), str(x['question2'])), axis=1)
-data['fuzz_token_sort_ratio'] = data.apply(lambda x: fuzz.token_sort_ratio(str(x['question1']), str(x['question2'])), axis=1)
+data['len_t1'] = data.text1.apply(lambda x: len(str(x)))
+data['len_t2'] = data.text2.apply(lambda x: len(str(x)))
+data['diff_len'] = data.len_t1 - data.len_t2
+data['len_char_t1'] = data.text1.apply(lambda x: len(''.join(set(str(x).replace(' ', '')))))
+data['len_char_t2'] = data.text2.apply(lambda x: len(''.join(set(str(x).replace(' ', '')))))
+data['len_word_t1'] = data.text1.apply(lambda x: len(str(x).split()))
+data['len_word_t2'] = data.text2.apply(lambda x: len(str(x).split()))
+data['common_words'] = data.apply(lambda x: len(set(str(x['text1']).lower().split()).intersection(set(str(x['text2']).lower().split()))), axis=1)
+data['fuzz_qratio'] = data.apply(lambda x: fuzz.QRatio(str(x['text1']), str(x['text2'])), axis=1)
+data['fuzz_WRatio'] = data.apply(lambda x: fuzz.WRatio(str(x['text1']), str(x['text2'])), axis=1)
+data['fuzz_partial_ratio'] = data.apply(lambda x: fuzz.partial_ratio(str(x['text1']), str(x['text2'])), axis=1)
+data['fuzz_partial_token_set_ratio'] = data.apply(lambda x: fuzz.partial_token_set_ratio(str(x['text1']), str(x['text2'])), axis=1)
+data['fuzz_partial_token_sort_ratio'] = data.apply(lambda x: fuzz.partial_token_sort_ratio(str(x['text1']), str(x['text2'])), axis=1)
+data['fuzz_token_set_ratio'] = data.apply(lambda x: fuzz.token_set_ratio(str(x['text1']), str(x['text2'])), axis=1)
+data['fuzz_token_sort_ratio'] = data.apply(lambda x: fuzz.token_sort_ratio(str(x['text1']), str(x['text2'])), axis=1)
 
 
-model = Word2Vec.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
-data['wmd'] = data.apply(lambda x: wmd(x['question1'], x['question2']), axis=1)
+model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
+data['wmd'] = data.apply(lambda x: wmd(x['text1'], x['text2']), axis=1)
 
 
-norm_model = Word2Vec.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
+norm_model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
 norm_model.init_sims(replace=True)
-data['norm_wmd'] = data.apply(lambda x: norm_wmd(x['question1'], x['question2']), axis=1)
+data['norm_wmd'] = data.apply(lambda x: norm_wmd(x['text1'], x['text2']), axis=1)
 
 question1_vectors = np.zeros((data.shape[0], 300))
 error_count = 0

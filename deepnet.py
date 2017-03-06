@@ -15,8 +15,8 @@ from keras import backend as K
 from keras.layers.advanced_activations import PReLU
 from keras.preprocessing import sequence, text
 
-data = pd.read_csv('quora_duplicate_questions.tsv', sep='\t')
-y = data.is_duplicate.values
+data = pd.read_csv('data/quora_duplicate_questions.tsv', sep='\t')
+y = data.duplicate.values
 
 tk = text.Tokenizer(nb_words=200000)
 
