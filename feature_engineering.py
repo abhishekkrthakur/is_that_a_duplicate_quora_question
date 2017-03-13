@@ -7,8 +7,8 @@ feature engineering
 import cPickle
 import pandas as pd
 import numpy as np
+import gensim
 from fuzzywuzzy import fuzz
-from gensim.models import Word2Vec
 from nltk.corpus import stopwords
 from tqdm import tqdm
 from scipy.stats import skew, kurtosis
@@ -51,7 +51,7 @@ def sent2vec(s):
     return v / np.sqrt((v ** 2).sum())
 
 
-data = pd.read_csv('quora_duplicate_questions.tsv', sep='\t')
+data = pd.read_csv('data/quora_duplicate_questions.tsv', sep='\t')
 data = data.drop(['id', 'qid1', 'qid2'], axis=1)
 
 
@@ -72,11 +72,11 @@ data['fuzz_token_set_ratio'] = data.apply(lambda x: fuzz.token_set_ratio(str(x['
 data['fuzz_token_sort_ratio'] = data.apply(lambda x: fuzz.token_sort_ratio(str(x['question1']), str(x['question2'])), axis=1)
 
 
-model = Word2Vec.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
+model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
 data['wmd'] = data.apply(lambda x: wmd(x['question1'], x['question2']), axis=1)
 
 
-norm_model = Word2Vec.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
+norm_model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)
 norm_model.init_sims(replace=True)
 data['norm_wmd'] = data.apply(lambda x: norm_wmd(x['question1'], x['question2']), axis=1)
 
