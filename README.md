@@ -24,7 +24,7 @@ cd data
 wget http://www-nlp.stanford.edu/data/glove.840B.300d.zip
 unzip glove.840B.300d.zip
 rm glove.840B.300d.zip
-wget http://qim.ec.quoracdn.net/quora_duplicate_questions.tsv
+wget https://raw.githubusercontent.com/MLDroid/quora_duplicate_challenge/master/data/quora_duplicate_questions.tsv
 wget https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz
 sudo python -m nltk.downloader stopwords
 cd ..
